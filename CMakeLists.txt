@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.23)
 
 project(SkeletonEngine LANGUAGES C CXX)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenGL REQUIRED)
@@ -12,6 +12,23 @@ find_package(glad CONFIG REQUIRED)
 
 add_executable(SkeletonEngine
     src/main.cpp
+    include/Engine.hpp
+    include/Rendering/VertexArray.hpp
+    include/Rendering/IndexBuffer.hpp
+    include/Rendering/VertexBuffer.hpp
+    include/Rendering/Shader.hpp
+    include/Core/Timer.hpp
+    include/Rendering/Mesh.hpp
+    include/Rendering/RendererTypes.hpp
+    src/Engine.cpp
+    src/Core/Timer.cpp
+    src/Rendering/IndexBuffer.cpp
+    src/Rendering/Mesh.cpp
+    include/Rendering/Camera.hpp
+    src/Rendering/Camera.cpp
+    src/Rendering/Shader.cpp
+    src/Rendering/VertexArray.cpp
+    src/Rendering/VertexBuffer.cpp
 )
 
 target_link_libraries(SkeletonEngine PRIVATE
