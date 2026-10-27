@@ -11,7 +11,7 @@
 
 constexpr float PI = std::numbers::pi;
 
-// force build
+// force buil
 
 void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
                                   GLsizei length, const GLchar *message, const void *userParam)
@@ -26,7 +26,7 @@ void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
     }
 }
 
-class Ellipse : public Engine::Rendering::Mesh
+/*class Ellipse : public Engine::Rendering::Mesh
 {
 public:
     Ellipse(glm::vec2 p1, glm::vec2 p2, int segments)
@@ -34,18 +34,21 @@ public:
                Engine::Rendering::Primitive::TriangleFan)
     {
         AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)0);
-        AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)(3 * sizeof(GLfloat)));
+        AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)(3 *
+sizeof(GLfloat)));
     }
 
 private:
-    std::vector<Engine::Rendering::Vertex> GenerateVertices(glm::vec2 p1, glm::vec2 p2, int segments)
+    std::vector<Engine::Rendering::Vertex> GenerateVertices(glm::vec2 p1, glm::vec2 p2, int
+segments)
     {
         std::vector<Engine::Rendering::Vertex> vertices;
         glm::vec2 center{(p1.x + p2.x) / 2.0f, (p1.y + p2.y) / 2.0f};
         float rx = std::abs(p2.x - p1.x) / 2.0f;
         float ry = std::abs(p2.y - p1.y) / 2.0f;
 
-        vertices.push_back(Engine::Rendering::Vertex{{center.x, center.y, 0.0f}, {0.5f, 0.5f}}); // center
+        vertices.push_back(Engine::Rendering::Vertex{{center.x, center.y, 0.0f}, {0.5f, 0.5f}}); //
+center
 
         float angleStep = (2.0f * PI) / static_cast<float>(segments);
 
@@ -75,7 +78,7 @@ private:
         indices.push_back(1);
         return indices;
     }
-};
+};*/
 
 int main()
 {
@@ -99,13 +102,14 @@ int main()
     float offset2 = -0.55;
     float offset3 = +0.75f;
 
-    Ellipse ellipse1(glm::vec2{-hyp1, -hyp1}, glm::vec2(hyp1, hyp1), 64);
+    /*Ellipse ellipse1(glm::vec2{-hyp1, -hyp1}, glm::vec2(hyp1, hyp1), 64);
     Ellipse ellipse2(glm::vec2{-hyp2 + offset2, -hyp2 + offset2},
                      glm::vec2(hyp2 + offset2, hyp2 + offset2), 64);
     Ellipse ellipse3(glm::vec2{-hyp3 + offset3, -hyp3 + offset3},
-                     glm::vec2(hyp3 + offset3, hyp3 + offset3), 64);
+                     glm::vec2(hyp3 + offset3, hyp3 + offset3), 64);*/
 
-    Engine::Rendering::Shader ellipseShader("resources/shaders/ellipse.vert", "resources/shaders/ellipse.frag");
+    Engine::Rendering::Shader ellipseShader("resources/shaders/ellipse.vert",
+                                            "resources/shaders/ellipse.frag");
 
     int frameCount = 0;
 
@@ -120,9 +124,9 @@ int main()
         ellipseShader.Use();
         ellipseShader.SetFloat("uTime", timer.TotalTime());
         ellipseShader.SetVec2("uResolution", engine.RESOLUTION);
-        ellipse1.Draw();
+        /*ellipse1.Draw();
         ellipse2.Draw();
-        ellipse3.Draw();
+        ellipse3.Draw();*/
 
         glfwSwapBuffers(engine.window);
         frameCount++;

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.23)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-project(SkeletonEngine LANGUAGES C CXX)
+project(Engine LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -10,7 +11,7 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 
-add_executable(SkeletonEngine
+add_executable(Engine
     src/main.cpp
     include/Engine.hpp
     include/Rendering/VertexArray.hpp
@@ -22,16 +23,15 @@ add_executable(SkeletonEngine
     include/Rendering/RendererTypes.hpp
     src/Engine.cpp
     src/Core/Timer.cpp
-    src/Rendering/Mesh.cpp
     include/Rendering/Camera.hpp
     src/Rendering/Camera.cpp
     src/Rendering/Shader.cpp
     include/Rendering/Vertex.hpp
 )
 
-target_include_directories(SkeletonEngine PRIVATE include)
+target_include_directories(Engine PRIVATE include)
 
-target_link_libraries(SkeletonEngine PRIVATE
+target_link_libraries(Engine PRIVATE
     glfw
     glm::glm
     glad::glad
@@ -40,12 +40,12 @@ target_link_libraries(SkeletonEngine PRIVATE
 
 # Automatically copy the resources folder to the build directory after every build
 add_custom_command(
-    TARGET SkeletonEngine POST_BUILD
+    TARGET Engine POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_SOURCE_DIR}/resources"
-        "$<TARGET_FILE_DIR:SkeletonEngine>/resources"
+        "$<TARGET_FILE_DIR:Engine>/resources"
 )
 
-set_property(TARGET SkeletonEngine PROPERTY
+set_property(TARGET Engine PROPERTY
     VS_DEBUGGER_WORKING_DIRECTORY "C:/Users/Z230/Desktop/Code/C++"
 )

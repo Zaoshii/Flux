@@ -7,7 +7,7 @@
 #include "Core/Timer.hpp"
 namespace Engine
 {
-    struct Engine
+struct Engine
 {
     GLFWwindow *window = nullptr;
     int WIDTH = 800, HEIGHT = 600;
@@ -79,7 +79,7 @@ namespace Engine
         Engine *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
         if (engine)
         {
-            engine->WIDTH = width; // This is now true physical pixels
+            engine->WIDTH = width;
             engine->HEIGHT = height;
             engine->RESOLUTION = glm::vec2{width, height};
 
@@ -87,4 +87,4 @@ namespace Engine
         }
     }
 };
-}
+} // namespace Engine
