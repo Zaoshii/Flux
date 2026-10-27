@@ -22,14 +22,14 @@ add_executable(SkeletonEngine
     include/Rendering/RendererTypes.hpp
     src/Engine.cpp
     src/Core/Timer.cpp
-    src/Rendering/IndexBuffer.cpp
     src/Rendering/Mesh.cpp
     include/Rendering/Camera.hpp
     src/Rendering/Camera.cpp
     src/Rendering/Shader.cpp
-    src/Rendering/VertexArray.cpp
-    src/Rendering/VertexBuffer.cpp
+    include/Rendering/Vertex.hpp
 )
+
+target_include_directories(SkeletonEngine PRIVATE include)
 
 target_link_libraries(SkeletonEngine PRIVATE
     glfw
