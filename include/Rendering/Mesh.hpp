@@ -35,6 +35,8 @@ public:
         vao.Unbind();
     }
 
+    ~Mesh() = default;
+
     void Draw()
     {
         vao.Bind();

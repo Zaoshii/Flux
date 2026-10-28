@@ -25,8 +25,8 @@ public:
         auto elapsedTime = std::chrono::duration<float>(now - m_LastPoint);
         m_LastPoint = now;
         float dt = elapsedTime.count();
-        if (dt > 0.05f)  // TODO: Important to know : fixed framerate
-            dt = 0.006f; // if dt too long consider basic 165 fps frame
+        // if (dt > 0.05f)  // TODO: Important to know : fixed framerate
+        // dt = 0.006f; // if dt too long consider basic 165 fps frame
         return dt;
     }
 

@@ -10,6 +10,7 @@
 #include "Rendering/Cube.hpp"
 
 #include <numbers>
+#include <mdspan>
 
 constexpr float PI = std::numbers::pi;
 
@@ -44,14 +45,18 @@ int main()
 
     int frameCount = 0;
 
-    float rotationSpeed = 1.5f;
-    float rotationSpeedX = 1.5f;
+    float rotationSpeed = 0.25f;
+    float rotationSpeedX = 1.6f;
     float rotationSpeedY = 1.0f;
-    float rotationSpeedZ = 0.5f;
+    float rotationSpeedZ = 1.4f;
 
     glm::vec3 X(1.0f, 0.0f, 0.0f);
     glm::vec3 Y(0.0f, 1.0f, 0.0f);
     glm::vec3 Z(0.0f, 0.0f, 1.0f);
+
+    constexpr size_t width = 10;
+    constexpr size_t height = 10;
+    constexpr size_t depth = 10;
 
     // --- 1. MATRICE PROJECTION FIXE ---
     // Paramètres : FOV de 45°, Ratio d'un écran 16:9 standard, Near plane à 0.1f, Far plane à
@@ -61,22 +66,41 @@ int main()
     glm::mat4 fixedProjection = glm::perspective(fov, engine.ASPECTRATIO, 0.1f, 100.0f);
 
     // --- 2. MATRICE VIEW FIXE (La Caméra) ---
-    glm::vec3 cameraPos = glm::vec3(0.0f, 3.0f, 5.0f); // Reculée de 5 unités, surélevée de 3 unités
-    glm::vec3 cameraTarget =
-        glm::vec3(0.0f, 0.0f, 0.0f); // Regarde le centre du monde (où sera votre cube)
+    glm::vec3 cameraPos =
+        glm::vec3((float)(width) * 2.5f + 5.0f, (float)(height) * 1.5f,
+                  (float)(depth) * 2.5f + 5.0f); // Reculée de 5 unités, surélevée de 3 unités
+    glm::vec3 cameraTarget = glm::vec3(0.0f, (float)(height) * 0.5f,
+                                       0.0f); // Regarde le centre du monde (où sera votre cube)
     glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); // L'axe Y pointe vers le haut
 
     glm::mat4 fixedView = glm::lookAt(cameraPos, cameraTarget, upVector);
 
-    Engine::Rendering::Cube cube;
-    cube.AddAttribute(0, 3, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)0);
-    cube.AddAttribute(1, 2, GL_FALSE, sizeof(Engine::Rendering::Vertex),
-                      (void *)(3 * sizeof(GL_FLOAT)));
-    cube.AddAttribute(2, 3, GL_FALSE, sizeof(Engine::Rendering::Vertex),
-                      (void *)(5 * sizeof(GL_FLOAT)));
+    std::shared_ptr<Engine::Rendering::Mesh> cubeMesh = Engine::Rendering::Mesh::CreateCube();
+    cubeMesh->AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)0);
+    cubeMesh->AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex),
+                           (void *)(3 * sizeof(GL_FLOAT)));
+    cubeMesh->AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex),
+                           (void *)(5 * sizeof(GL_FLOAT)));
 
     Engine::Rendering::Shader cubeShader("resources/shaders/cube.vert",
                                          "resources/shaders/cube.frag");
+
+    std::vector<Engine::Rendering::Cube> rawCubes(width * height * depth,
+                                                  Engine::Rendering::Cube(cubeMesh));
+    auto cubeGrid = std::mdspan(rawCubes.data(), width, height, depth);
+
+    for (size_t x = 0; x < width; x++)
+    {
+        for (size_t y = 0; y < height; y++)
+        {
+            for (size_t z = 0; z < depth; z++)
+            {
+                cubeGrid[x, y, z].transform.position.x = 2 * x;
+                cubeGrid[x, y, z].transform.position.y = 2 * y;
+                cubeGrid[x, y, z].transform.position.z = 2 * z;
+            }
+        }
+    }
 
     while (!glfwWindowShouldClose(engine.window))
     { // Main loop
@@ -91,15 +115,17 @@ int main()
         glm::quat rotY = glm::angleAxis(angleRotationThisFrame * rotationSpeedY, Y);
         glm::quat rotZ = glm::angleAxis(angleRotationThisFrame * rotationSpeedZ, Z);
         glm::quat rotFinal = rotX * rotY * rotZ;
-        cube.transform.rotation = rotFinal * cube.transform.rotation;
-        cube.transform.rotation = glm::normalize(cube.transform.rotation);
-
         engine.Run();
         cubeShader.Use();
-        cubeShader.SetMat4("uModel", cube.GetModelMatrix());
         cubeShader.SetMat4("uView", fixedView);
         cubeShader.SetMat4("uProj", fixedProjection);
-        cube.Draw();
+        for (auto &cube : rawCubes)
+        {
+            cube.transform.rotation = rotFinal * cube.transform.rotation;
+            cube.transform.rotation = glm::normalize(cube.transform.rotation);
+            cubeShader.SetMat4("uModel", cube.transform.GetModelMatrix());
+            cube.Draw();
+        }
 
         glfwSwapBuffers(engine.window);
         frameCount++;

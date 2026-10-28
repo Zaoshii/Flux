@@ -9,9 +9,11 @@ namespace Engine::Rendering
 class Cube
 {
 private:
-    std::shared_ptr<Mesh> mesh = Mesh::CreateCube();
+    std::shared_ptr<Mesh> mesh;
 
 public:
+    Cube(std::shared_ptr<Mesh> mesh) : mesh(mesh) {}
+    ~Cube() = default;
     Transform transform;
     void Draw() { mesh->Draw(); }
     void AddAttribute(GLuint index, GLint size, GLboolean normalized, GLsizei stride,
