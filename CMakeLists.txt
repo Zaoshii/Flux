@@ -27,6 +27,10 @@ add_executable(Engine
     src/Rendering/Camera.cpp
     src/Rendering/Shader.cpp
     include/Rendering/Vertex.hpp
+    include/Rendering/Cube.hpp
+    src/Rendering/Cube.cpp
+    include/Rendering/Transform.hpp
+    src/Rendering/Mesh.cpp
 )
 
 target_include_directories(Engine PRIVATE include)

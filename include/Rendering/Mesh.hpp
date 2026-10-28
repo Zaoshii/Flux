@@ -6,21 +6,22 @@
 #include "Rendering/VertexArray.hpp"
 #include "Rendering/RendererTypes.hpp"
 #include "Rendering/Vertex.hpp"
+#include <memory>
 
 namespace Engine::Rendering
 {
-    class Mesh
+class Mesh
 {
 private:
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    Primitive type;
-
     VertexBuffer vbo;
     IndexBuffer ebo;
+    VertexArray vao;
 
 public:
-    VertexArray vao;
+    Primitive type;
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Primitive type)
         : vertices(std::move(vertices)), indices(std::move(indices)), type(std::move(type))
     {
@@ -69,6 +70,8 @@ public:
         ebo.Bind();
         vao.AddAttribute(index, size, type, normalized, stride, pointer);
     }
+
+    static std::shared_ptr<Mesh> CreateCube();
 };
 
-}
+} // namespace Engine::Rendering

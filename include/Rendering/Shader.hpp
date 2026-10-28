@@ -67,5 +67,9 @@ public:
     {
         glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(data));
     }
+    void SetMat4(const std::string &name, const glm::mat4 data) const
+    {
+        glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(data));
+    }
 };
 } // namespace Engine::Rendering

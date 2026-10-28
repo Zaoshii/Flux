@@ -11,6 +11,7 @@ struct Engine
 {
     GLFWwindow *window = nullptr;
     int WIDTH = 800, HEIGHT = 600;
+    float ASPECTRATIO = (float)WIDTH / (float)HEIGHT;
     glm::vec2 RESOLUTION{WIDTH, HEIGHT};
     Core::Timer *timer = nullptr; // optional timer hook
 
@@ -31,7 +32,7 @@ struct Engine
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 4);
 
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Skeleton Body", nullptr, nullptr);
+        window = glfwCreateWindow(WIDTH, HEIGHT, "Engine", nullptr, nullptr);
 
         if (!window)
         {
@@ -41,7 +42,7 @@ struct Engine
 
         glfwMakeContextCurrent(window);
 
-        glfwSwapInterval(1); // Vsync On
+        glfwSwapInterval(1); // TODO: Important to know : VSYNC ON
 
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
@@ -51,6 +52,11 @@ struct Engine
         }
 
         glEnable(GL_MULTISAMPLE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK); // Rejeter les faces arrière (comportement par défaut)
+        glFrontFace(GL_CCW); // Définir que le sens anti-horaire (Counter-ClockWise) est l'avant du
+        //     triangle
+        glEnable(GL_DEPTH_TEST);
 
         glfwSetWindowUserPointer(window, this);
 
@@ -71,7 +77,7 @@ struct Engine
     void Run()
     {
         glClearColor(53.0 / 255.0, 19.0 / 255.0, 79.0 / 255.0, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     static void FramebufferResizeCallback(GLFWwindow *window, int width, int height)
@@ -82,6 +88,7 @@ struct Engine
             engine->WIDTH = width;
             engine->HEIGHT = height;
             engine->RESOLUTION = glm::vec2{width, height};
+            engine->ASPECTRATIO = (float)width / (float)height;
 
             glViewport(0, 0, width, height);
         }

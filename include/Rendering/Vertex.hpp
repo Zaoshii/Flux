@@ -3,11 +3,15 @@
 
 namespace Engine::Rendering
 {
-    struct Vertex
+struct Vertex
 {
     glm::vec3 position;
     glm::vec2 uv;
+    glm::vec3 normal;
 
-    Vertex(glm::vec3 position, glm::vec2 uv) : position(position), uv(uv) {}
+    Vertex(glm::vec3 position, glm::vec2 uv, glm::vec3 normal)
+        : position(position), uv(uv), normal(normal)
+    {
+    }
 };
-}
+} // namespace Engine::Rendering
