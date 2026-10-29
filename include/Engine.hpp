@@ -5,49 +5,28 @@
 #include <stdexcept>
 #include <iostream>
 #include "Core/Timer.hpp"
+#include "Core/Window.hpp"
+#include <memory>
 namespace Engine
 {
 struct Engine
 {
-    GLFWwindow *window = nullptr;
-    int WIDTH = 800, HEIGHT = 600;
-    float ASPECTRATIO = (float)WIDTH / (float)HEIGHT;
-    glm::vec2 RESOLUTION{WIDTH, HEIGHT};
-    Core::Timer *timer = nullptr; // optional timer hook
+    std::shared_ptr<Core::Window> window =
+        nullptr; // optional window hook to allow for custom window management
+    std::unique_ptr<Core::Timer> timer = nullptr; // optional timer hook
 
     Engine()
     {
+        window = std::make_shared<Core::Window>(800, 600, "Engine");
+
         glfwSetErrorCallback(
             [](int error, const char *description)
             { std::cerr << "GLFW Error " << error << ": " << description << '\n'; });
 
-        if (!glfwInit())
-        {
-            std::cerr << "failed to initialize GLFW\n";
-            return;
-        }
-
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-
-        window = glfwCreateWindow(WIDTH, HEIGHT, "Engine", nullptr, nullptr);
-
-        if (!window)
-        {
-            std::cerr << "Failed to initialize GLFW window\n";
-            glfwTerminate();
-        }
-
-        glfwMakeContextCurrent(window);
-
-        glfwSwapInterval(1); // TODO: Important to know : VSYNC ON
-
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
             std::cerr << "Failed to initialize Glad\n";
-            glfwDestroyWindow(window);
+            glfwDestroyWindow(window->glfwWindow);
             glfwTerminate();
         }
 
@@ -56,42 +35,44 @@ struct Engine
         glCullFace(GL_BACK); // Rejeter les faces arrière (comportement par défaut)
         glFrontFace(GL_CCW); // Définir que le sens anti-horaire (Counter-ClockWise) est l'avant du
         //     triangle
-        glEnable(GL_DEPTH_TEST);
-
-        glfwSetWindowUserPointer(window, this);
-
-        glfwSetFramebufferSizeCallback(window, FramebufferResizeCallback);
+        glEnable(GL_DEPTH_TEST); // TODO: important counter-clockwise is front face, clockwise is
+                                 // back face
 
         std::cout << "OpenGL version is : " << glGetString(GL_VERSION) << '\n';
     }
 
-    ~Engine()
+    Engine(int width, int height, std::string title)
     {
-        if (window)
+        window = std::make_shared<Core::Window>(width, height, title);
+
+        glfwSetErrorCallback(
+            [](int error, const char *description)
+            { std::cerr << "GLFW Error " << error << ": " << description << '\n'; });
+
+        if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
-            glfwDestroyWindow(window);
+            std::cerr << "Failed to initialize Glad\n";
+            glfwDestroyWindow(window->glfwWindow);
+            glfwTerminate();
         }
-        glfwTerminate();
+
+        glEnable(GL_MULTISAMPLE);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK); // Rejeter les faces arrière (comportement par défaut)
+        glFrontFace(GL_CCW); // Définir que le sens anti-horaire (Counter-ClockWise) est l'avant du
+        //     triangle
+        glEnable(GL_DEPTH_TEST); // TODO: important counter-clockwise is front face, clockwise is
+                                 // back face
+
+        std::cout << "OpenGL version is : " << glGetString(GL_VERSION) << '\n';
     }
+
+    ~Engine() = default;
 
     void Run()
     {
         glClearColor(53.0 / 255.0, 19.0 / 255.0, 79.0 / 255.0, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
-
-    static void FramebufferResizeCallback(GLFWwindow *window, int width, int height)
-    {
-        Engine *engine = static_cast<Engine *>(glfwGetWindowUserPointer(window));
-        if (engine)
-        {
-            engine->WIDTH = width;
-            engine->HEIGHT = height;
-            engine->RESOLUTION = glm::vec2{width, height};
-            engine->ASPECTRATIO = (float)width / (float)height;
-
-            glViewport(0, 0, width, height);
-        }
     }
 };
 } // namespace Engine

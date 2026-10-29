@@ -8,6 +8,8 @@
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Cube.hpp"
+#include "Core/InputManager.hpp"
+#include "Rendering/Camera.hpp"
 
 #include <numbers>
 #include <mdspan>
@@ -32,14 +34,14 @@ void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
 int main()
 {
 
-    Engine::Engine engine;
+    Engine::Engine engine(1920, 1080, "quaternion Camera waouh!");
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(OpenGLDebugCallback, nullptr);
 
     Engine::Core::Timer timer;
-    engine.timer = &timer;
+    engine.timer = std::make_unique<Engine::Core::Timer>(timer);
 
     float deltaTime = 0.0f;
 
@@ -54,26 +56,16 @@ int main()
     glm::vec3 Y(0.0f, 1.0f, 0.0f);
     glm::vec3 Z(0.0f, 0.0f, 1.0f);
 
-    constexpr size_t width = 10;
-    constexpr size_t height = 10;
-    constexpr size_t depth = 10;
+    constexpr size_t width = 5;
+    constexpr size_t height = 5;
+    constexpr size_t depth = 5;
 
-    // --- 1. MATRICE PROJECTION FIXE ---
-    // Paramètres : FOV de 45°, Ratio d'un écran 16:9 standard, Near plane à 0.1f, Far plane à
-    // 100.0f
-    float fov = glm::radians(45.0f);
-    float aspectRatio = 16.0f / 9.0f; // Modifiez si votre fenêtre n'est pas en 16:9
-    glm::mat4 fixedProjection = glm::perspective(fov, engine.ASPECTRATIO, 0.1f, 100.0f);
+    Engine::Rendering::Camera camera(glm::vec3((float)(width) * 2.5f + 5.0f, (float)(height) * 1.5f,
+                                               (float)(depth) * 2.5f + 5.0f),
+                                     glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 360.0f, 0.25f);
 
-    // --- 2. MATRICE VIEW FIXE (La Caméra) ---
-    glm::vec3 cameraPos =
-        glm::vec3((float)(width) * 2.5f + 5.0f, (float)(height) * 1.5f,
-                  (float)(depth) * 2.5f + 5.0f); // Reculée de 5 unités, surélevée de 3 unités
-    glm::vec3 cameraTarget = glm::vec3(0.0f, (float)(height) * 0.5f,
-                                       0.0f); // Regarde le centre du monde (où sera votre cube)
-    glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f); // L'axe Y pointe vers le haut
-
-    glm::mat4 fixedView = glm::lookAt(cameraPos, cameraTarget, upVector);
+    glm::mat4 fixedProjection =
+        glm::perspective(camera.fov, engine.window->ASPECTRATIO, 0.1f, 100.0f);
 
     std::shared_ptr<Engine::Rendering::Mesh> cubeMesh = Engine::Rendering::Mesh::CreateCube();
     cubeMesh->AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)0);
@@ -102,14 +94,22 @@ int main()
         }
     }
 
-    while (!glfwWindowShouldClose(engine.window))
+    Engine::Core::InputManager inputManager(engine.window);
+
+    while (!glfwWindowShouldClose(engine.window->glfwWindow))
     { // Main loop
         glfwPollEvents();
 
         deltaTime = timer.DeltaTime();
         if (frameCount % 50 == 0)
+        {
             std::cout << std::format("The frame rate is : {}\n", 1.0f / deltaTime);
-        fixedProjection = glm::perspective(fov, engine.ASPECTRATIO, 0.1f, 100.0f);
+            /*std::cout << inputManager.mouseX << "\n"
+                      << inputManager.mouseY << "\n"
+                      << inputManager.deltaMouseX << "\n"
+                      << inputManager.deltaMouseY << "\n";*/
+        }
+        fixedProjection = glm::perspective(camera.fov, engine.window->ASPECTRATIO, 0.1f, 100.0f);
         float angleRotationThisFrame = rotationSpeed * deltaTime;
         glm::quat rotX = glm::angleAxis(angleRotationThisFrame * rotationSpeedX, X);
         glm::quat rotY = glm::angleAxis(angleRotationThisFrame * rotationSpeedY, Y);
@@ -117,8 +117,9 @@ int main()
         glm::quat rotFinal = rotX * rotY * rotZ;
         engine.Run();
         cubeShader.Use();
-        cubeShader.SetMat4("uView", fixedView);
+        cubeShader.SetMat4("uView", camera.GetViewMatrix());
         cubeShader.SetMat4("uProj", fixedProjection);
+        camera.Update(inputManager.deltaMouseX, inputManager.deltaMouseY, deltaTime);
         for (auto &cube : rawCubes)
         {
             cube.transform.rotation = rotFinal * cube.transform.rotation;
@@ -127,8 +128,9 @@ int main()
             cube.Draw();
         }
 
-        glfwSwapBuffers(engine.window);
+        engine.window->SwapBuffers();
         frameCount++;
+        inputManager.ClearDeltas();
     }
 
     return 0;

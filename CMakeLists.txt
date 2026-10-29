@@ -31,6 +31,10 @@ add_executable(Engine
     src/Rendering/Cube.cpp
     include/Rendering/Transform.hpp
     src/Rendering/Mesh.cpp
+    include/Core/Log.hpp
+    include/Core/Window.hpp
+    include/Core/InputManager.hpp
+    src/Core/InputManager.cpp
 )
 
 target_include_directories(Engine PRIVATE include)

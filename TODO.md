@@ -1,6 +1,6 @@
 
 # TODO
--Rendering
+- Rendering
  
   - [ ] add Instanced GPU draw calls
   - [ ] add Camera
@@ -10,7 +10,9 @@
 - Core
     - [ ] add a logger
     - [ ] eventually add a single background worker thread for asset loading.
+    - [ ] remove the std::runtime errors where not needed to avoid closing the program
 
 - QoL
   - [ ] write some documentation for the classes and objects
   - [ ] verify the code for each class ( for my future sanity )
+  - [ ] rewrite the old prefix m_name to name
