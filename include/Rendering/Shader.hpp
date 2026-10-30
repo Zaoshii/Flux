@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <format>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 inline std::string GetShaderContent(std::string path)
 {
@@ -72,4 +72,4 @@ public:
         glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(data));
     }
 };
-} // namespace Engine::Rendering
+} // namespace engine::rendering

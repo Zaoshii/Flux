@@ -1,6 +1,6 @@
 #include "Core/Timer.hpp"
 
-namespace Engine::Core
+namespace engine::core
 {
 
-} // namespace Engine::Core
+} // namespace engine::core

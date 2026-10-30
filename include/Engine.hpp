@@ -7,17 +7,17 @@
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
 #include <memory>
-namespace Engine
+namespace engine
 {
 struct Engine
 {
-    std::shared_ptr<Core::Window> window =
+    std::shared_ptr<core::Window> window =
         nullptr; // optional window hook to allow for custom window management
-    std::unique_ptr<Core::Timer> timer = nullptr; // optional timer hook
+    std::unique_ptr<core::Timer> timer = nullptr; // optional timer hook
 
     Engine()
     {
-        window = std::make_shared<Core::Window>(800, 600, "Engine");
+        window = std::make_shared<core::Window>(800, 600, "Engine");
 
         glfwSetErrorCallback(
             [](int error, const char *description)
@@ -26,7 +26,7 @@ struct Engine
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
             std::cerr << "Failed to initialize Glad\n";
-            glfwDestroyWindow(window->glfwWindow);
+            glfwDestroyWindow(window->getGlfwWindow());
             glfwTerminate();
         }
 
@@ -43,7 +43,7 @@ struct Engine
 
     Engine(int width, int height, std::string title)
     {
-        window = std::make_shared<Core::Window>(width, height, title);
+        window = std::make_shared<core::Window>(width, height, title);
 
         glfwSetErrorCallback(
             [](int error, const char *description)
@@ -52,7 +52,7 @@ struct Engine
         if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress)))
         {
             std::cerr << "Failed to initialize Glad\n";
-            glfwDestroyWindow(window->glfwWindow);
+            glfwDestroyWindow(window->getGlfwWindow());
             glfwTerminate();
         }
 
@@ -75,4 +75,4 @@ struct Engine
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 };
-} // namespace Engine
+} // namespace engine

@@ -1,8 +1,8 @@
 #pragma once
 #include <glad/glad.h>
-namespace Engine::Rendering
+namespace engine::rendering
 {
-    class VertexBuffer
+class VertexBuffer
 {
 private:
     GLuint m_Handle;
@@ -45,4 +45,4 @@ public:
     }
 };
 
-}
+} // namespace engine::rendering

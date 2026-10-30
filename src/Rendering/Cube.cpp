@@ -1,6 +1,6 @@
 #include "Rendering/Cube.hpp"
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 
 }

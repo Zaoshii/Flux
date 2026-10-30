@@ -1,40 +1,62 @@
 #pragma once
+
 #include <chrono>
-namespace Engine::Core
+
+namespace engine::core
 {
+
 class Timer
 {
-private:
-    std::chrono::steady_clock::time_point m_StartPoint;
-    std::chrono::steady_clock::time_point m_LastPoint;
 
 public:
-    Timer() { Reset(); }
+    Timer() { reset(); }
 
     ~Timer() = default;
 
-    void Reset()
+    /**
+     * @brief restarts entirely the timer
+     *
+     */
+    void reset()
     {
-        m_StartPoint = std::chrono::steady_clock::now();
-        m_LastPoint = m_StartPoint;
+        startPoint_ = std::chrono::steady_clock::now();
+        lastPoint_ = startPoint_;
+        deltaTime_ = 0.0f; ///< Elapsed time in seconds since last frame
     }
 
-    float DeltaTime()
+    /**
+     * @brief updates deltaTime
+     *
+     */
+    void update()
     {
         auto now = std::chrono::steady_clock::now();
-        auto elapsedTime = std::chrono::duration<float>(now - m_LastPoint);
-        m_LastPoint = now;
-        float dt = elapsedTime.count();
+
+        deltaTime_ = std::chrono::duration<float>(now - lastPoint_).count();
+
+        lastPoint_ = now;
         // if (dt > 0.05f)  // TODO: Important to know : fixed framerate
         // dt = 0.006f; // if dt too long consider basic 165 fps frame
-        return dt;
     }
 
-    float TotalTime()
+    /**
+     *
+     *
+     * @return deltaTime in seconds
+     */
+    float getDeltaTime() const { return deltaTime_; }
+
+    float getTotalTime() const
     {
         auto now = std::chrono::steady_clock::now();
-        auto totalTime = std::chrono::duration<float>(now - m_StartPoint);
+        auto totalTime = std::chrono::duration<float>(now - startPoint_);
         return totalTime.count();
     }
+
+private:
+    std::chrono::steady_clock::time_point startPoint_;
+    std::chrono::steady_clock::time_point lastPoint_;
+    float deltaTime_ = 0.0f;
 };
-} // namespace Engine::Core
+
+} // namespace engine::core

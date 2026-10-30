@@ -8,7 +8,7 @@
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Cube.hpp"
-#include "Core/InputManager.hpp"
+#include "Core/input_manager.hpp"
 #include "Rendering/Camera.hpp"
 
 #include <numbers>
@@ -17,6 +17,8 @@
 constexpr float PI = std::numbers::pi;
 
 // force buil
+
+using namespace engine;
 
 void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
                                   GLsizei length, const GLchar *message, const void *userParam)
@@ -34,14 +36,14 @@ void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
 int main()
 {
 
-    Engine::Engine engine(1920, 1080, "quaternion Camera waouh!");
+    Engine engine(1500, 1000, "quaternion Camera waouh!");
 
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(OpenGLDebugCallback, nullptr);
 
-    Engine::Core::Timer timer;
-    engine.timer = std::make_unique<Engine::Core::Timer>(timer);
+    core::Timer timer;
+    engine.timer = std::make_unique<core::Timer>(timer);
 
     float deltaTime = 0.0f;
 
@@ -56,29 +58,28 @@ int main()
     glm::vec3 Y(0.0f, 1.0f, 0.0f);
     glm::vec3 Z(0.0f, 0.0f, 1.0f);
 
-    constexpr size_t width = 5;
-    constexpr size_t height = 5;
-    constexpr size_t depth = 5;
+    constexpr size_t width = 8;
+    constexpr size_t height = 8;
+    constexpr size_t depth = 8;
 
-    Engine::Rendering::Camera camera(glm::vec3((float)(width) * 2.5f + 5.0f, (float)(height) * 1.5f,
-                                               (float)(depth) * 2.5f + 5.0f),
-                                     glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 360.0f, 0.25f);
+    rendering::CameraSettings settings;
+    settings.position = glm::vec3((float)(width) * 4.5f + 5.0f, (float)(height) * 1.5f,
+                                  (float)(depth) * 4.5f + 5.0f);
+    settings.projectionType = rendering::ProjectionType::Orthographic;
+    settings.orthographicSize = 50.0f;
 
-    glm::mat4 fixedProjection =
-        glm::perspective(camera.fov, engine.window->ASPECTRATIO, 0.1f, 100.0f);
+    rendering::Camera camera(settings);
 
-    std::shared_ptr<Engine::Rendering::Mesh> cubeMesh = Engine::Rendering::Mesh::CreateCube();
-    cubeMesh->AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex), (void *)0);
-    cubeMesh->AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex),
+    std::shared_ptr<rendering::Mesh> cubeMesh = rendering::Mesh::CreateCube();
+    cubeMesh->AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0);
+    cubeMesh->AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
                            (void *)(3 * sizeof(GL_FLOAT)));
-    cubeMesh->AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(Engine::Rendering::Vertex),
+    cubeMesh->AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
                            (void *)(5 * sizeof(GL_FLOAT)));
 
-    Engine::Rendering::Shader cubeShader("resources/shaders/cube.vert",
-                                         "resources/shaders/cube.frag");
+    rendering::Shader cubeShader("resources/shaders/cube.vert", "resources/shaders/cube.frag");
 
-    std::vector<Engine::Rendering::Cube> rawCubes(width * height * depth,
-                                                  Engine::Rendering::Cube(cubeMesh));
+    std::vector<rendering::Cube> rawCubes(width * height * depth, rendering::Cube(cubeMesh));
     auto cubeGrid = std::mdspan(rawCubes.data(), width, height, depth);
 
     for (size_t x = 0; x < width; x++)
@@ -94,13 +95,13 @@ int main()
         }
     }
 
-    Engine::Core::InputManager inputManager(engine.window);
+    core::InputManager inputManager(engine.window);
 
-    while (!glfwWindowShouldClose(engine.window->glfwWindow))
+    while (!glfwWindowShouldClose(engine.window->getGlfwWindow()))
     { // Main loop
         glfwPollEvents();
-
-        deltaTime = timer.DeltaTime();
+        timer.update();
+        deltaTime = timer.getDeltaTime();
         if (frameCount % 50 == 0)
         {
             std::cout << std::format("The frame rate is : {}\n", 1.0f / deltaTime);
@@ -109,7 +110,6 @@ int main()
                       << inputManager.deltaMouseX << "\n"
                       << inputManager.deltaMouseY << "\n";*/
         }
-        fixedProjection = glm::perspective(camera.fov, engine.window->ASPECTRATIO, 0.1f, 100.0f);
         float angleRotationThisFrame = rotationSpeed * deltaTime;
         glm::quat rotX = glm::angleAxis(angleRotationThisFrame * rotationSpeedX, X);
         glm::quat rotY = glm::angleAxis(angleRotationThisFrame * rotationSpeedY, Y);
@@ -117,9 +117,9 @@ int main()
         glm::quat rotFinal = rotX * rotY * rotZ;
         engine.Run();
         cubeShader.Use();
-        cubeShader.SetMat4("uView", camera.GetViewMatrix());
-        cubeShader.SetMat4("uProj", fixedProjection);
-        camera.Update(inputManager.deltaMouseX, inputManager.deltaMouseY, deltaTime);
+        cubeShader.SetMat4("uView", camera.getViewMatrix());
+        cubeShader.SetMat4("uProj", camera.getProjectionMatrix(engine.window->getAspectRatio()));
+        camera.Update(inputManager.getDeltaMouseX(), inputManager.getDeltaMouseY(), deltaTime);
         for (auto &cube : rawCubes)
         {
             cube.transform.rotation = rotFinal * cube.transform.rotation;
@@ -128,9 +128,9 @@ int main()
             cube.Draw();
         }
 
-        engine.window->SwapBuffers();
+        engine.window->swapBuffers();
         frameCount++;
-        inputManager.ClearDeltas();
+        inputManager.clearDeltas();
     }
 
     return 0;

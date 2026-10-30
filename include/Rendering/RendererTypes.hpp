@@ -1,8 +1,8 @@
 #pragma once
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
-    enum class Primitive
+enum class Primitive
 {
     Points,
     Lines,
@@ -11,4 +11,9 @@ namespace Engine::Rendering
     TriangleStrip,
     TriangleFan
 };
-}
+enum class ProjectionType
+{
+    Perspective,
+    Orthographic
+};
+} // namespace engine::rendering

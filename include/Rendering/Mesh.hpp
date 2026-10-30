@@ -8,7 +8,7 @@
 #include "Rendering/Vertex.hpp"
 #include <memory>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 class Mesh
 {
@@ -76,4 +76,4 @@ public:
     static std::shared_ptr<Mesh> CreateCube();
 };
 
-} // namespace Engine::Rendering
+} // namespace engine::rendering

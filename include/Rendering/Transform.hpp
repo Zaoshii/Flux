@@ -4,7 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 struct Transform
 {
@@ -30,4 +30,4 @@ struct Transform
         return transMat * rotationMat * scaleMat;
     }
 };
-} // namespace Engine::Rendering
+} // namespace engine::rendering

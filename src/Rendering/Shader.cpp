@@ -1,5 +1,5 @@
 #include "Rendering/Shader.hpp"
-namespace Engine::Rendering
+namespace engine::rendering
 {
 Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
 {
@@ -54,4 +54,4 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
     glDeleteShader(fragmentShader);
 }
 
-} // namespace Engine::Rendering
+} // namespace engine::rendering

@@ -5,106 +5,93 @@
 #include <glm/glm.hpp>
 #include <stdexcept>
 
-namespace Engine::Core
+namespace engine::core
 {
 class Window
 {
 public:
-    GLFWwindow *glfwWindow = nullptr;
-    int WIDTH = 800, HEIGHT = 600;
-    glm::vec2 RESOLUTION = glm::vec2{WIDTH, HEIGHT};
-    float ASPECTRATIO = (float)WIDTH / (float)HEIGHT;
-
+    /**
+     * @brief Constructs a new window and sets up GLFW context as well as a few parameters for the
+     * window
+     *
+     */
     Window()
     {
-        if (!glfwInit())
-        {
-            throw std::runtime_error("Failed to initialize GLFW");
-        }
+        setGLFWContext();
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        setGLFWHints();
 
-        glfwWindow = glfwCreateWindow(WIDTH, HEIGHT, "Engine", nullptr, nullptr);
+        glfwWindow_ = glfwCreateWindow(width_, height_, "Engine", nullptr, nullptr);
 
-        if (!glfwWindow)
+        if (!glfwWindow_)
         {
             glfwTerminate();
             throw std::runtime_error("Failed to create GLFW window");
         }
 
-        glfwMakeContextCurrent(glfwWindow);
-        glfwSetWindowUserPointer(glfwWindow, this);
+        glfwMakeContextCurrent(glfwWindow_);
 
-        glfwSetFramebufferSizeCallback(glfwWindow, FramebufferResizeCallback);
-
-        glfwSwapInterval(1); // TODO: Important to know : VSYNC ON
-        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        setWindowParameters();
     }
 
     Window(int width, int height, std::string title)
-        : WIDTH(width), HEIGHT(height),
-          ASPECTRATIO(static_cast<float>(width) / static_cast<float>(height))
+        : width_(width), height_(height), resolution_(glm::vec2{width_, height_}),
+          aspectRatio_(static_cast<float>(width) / static_cast<float>(height))
     {
-        if (!glfwInit())
-        {
-            throw std::runtime_error("Failed to initialize GLFW");
-        }
+        setGLFWContext();
 
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+        setGLFWHints();
 
-        glfwWindow = glfwCreateWindow(WIDTH, HEIGHT, title.c_str(), nullptr, nullptr);
+        glfwWindow_ = glfwCreateWindow(width_, height_, title.c_str(), nullptr, nullptr);
 
-        if (!glfwWindow)
+        if (!glfwWindow_)
         {
             glfwTerminate();
             throw std::runtime_error("Failed to create GLFW window");
         }
 
-        glfwMakeContextCurrent(glfwWindow);
-        glfwSetWindowUserPointer(glfwWindow, this);
+        glfwMakeContextCurrent(glfwWindow_);
 
-        glfwSetFramebufferSizeCallback(glfwWindow, FramebufferResizeCallback);
-
-        glfwSwapInterval(1); // TODO: Important to know : VSYNC ON
-        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        setWindowParameters();
     }
-
+    /**
+     * @brief Destroys the GLFW context since the window owns it
+     *
+     */
     ~Window()
     {
-        if (glfwWindow)
+        if (glfwWindow_)
         {
-            glfwDestroyWindow(glfwWindow);
-            glfwWindow = nullptr;
+            glfwDestroyWindow(glfwWindow_);
+            glfwWindow_ = nullptr;
         }
         glfwTerminate();
     }
 
-    static void FramebufferResizeCallback(GLFWwindow *window, int width, int height)
-    {
-        Window *myWindow = static_cast<Window *>(glfwGetWindowUserPointer(window));
-        if (myWindow)
-        {
-            myWindow->WIDTH = width;
-            myWindow->HEIGHT = height;
-            myWindow->RESOLUTION = glm::vec2{width, height};
-            myWindow->ASPECTRATIO = (float)width / (float)height;
+    void swapBuffers();
 
-            glViewport(0, 0, width, height);
-        }
-    }
+    GLFWwindow *getGlfwWindow() const { return glfwWindow_; }
 
-    void SwapBuffers()
-    {
-        if (glfwWindow)
-        {
-            glfwSwapBuffers(glfwWindow);
-        }
-    }
+    int getWidth() const { return width_; }
+
+    int getHeight() const { return height_; }
+
+    glm::vec2 getResolution() const { return resolution_; }
+
+    float getAspectRatio() const { return aspectRatio_; }
+
+private:
+    GLFWwindow *glfwWindow_ = nullptr;
+    int width_ = 800, height_ = 600;
+    glm::vec2 resolution_ = glm::vec2{width_, height_};
+    float aspectRatio_ = (float)width_ / (float)height_;
+
+    void setGLFWContext();
+
+    void setGLFWHints();
+
+    void setWindowParameters();
+
+    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 };
-} // namespace Engine::Core
+} // namespace engine::core

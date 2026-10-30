@@ -1,9 +1,9 @@
 #pragma once
 #include <glad/glad.h>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
-    class VertexArray
+class VertexArray
 {
 private:
     GLuint m_Handle;
@@ -48,4 +48,4 @@ public:
 
     void Unbind() const { glBindVertexArray(0); }
 };
-}
+} // namespace engine::rendering

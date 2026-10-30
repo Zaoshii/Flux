@@ -1,9 +1,9 @@
 #pragma once
 #include <glad/glad.h>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
-    class IndexBuffer
+class IndexBuffer
 {
 private:
     GLuint m_Handle;
@@ -56,4 +56,4 @@ public:
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
     }
 };
-}
+} // namespace engine::rendering

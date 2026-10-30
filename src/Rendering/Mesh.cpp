@@ -1,6 +1,6 @@
 #include "Rendering/Mesh.hpp"
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 std::shared_ptr<Mesh> Mesh::CreateCube()
 {
@@ -59,4 +59,4 @@ std::shared_ptr<Mesh> Mesh::CreateCube()
         return std::make_shared<Mesh>(vertices, indices, Primitive::Triangles);
     }
 }
-} // namespace Engine::Rendering
+} // namespace engine::rendering

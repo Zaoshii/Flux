@@ -33,8 +33,10 @@ add_executable(Engine
     src/Rendering/Mesh.cpp
     include/Core/Log.hpp
     include/Core/Window.hpp
-    include/Core/InputManager.hpp
-    src/Core/InputManager.cpp
+    include/Core/input_manager.hpp
+    src/Core/input_manager.cpp
+    src/Core/window.cpp
+    include/Rendering/camera_settings.hpp
 )
 
 target_include_directories(Engine PRIVATE include)

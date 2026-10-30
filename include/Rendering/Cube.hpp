@@ -3,7 +3,7 @@
 #include "Rendering/Transform.hpp"
 #include <memory>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 
 class Cube
@@ -19,4 +19,4 @@ public:
     glm::mat4 GetModelMatrix() { return transform.GetModelMatrix(); }
 };
 
-} // namespace Engine::Rendering
+} // namespace engine::rendering

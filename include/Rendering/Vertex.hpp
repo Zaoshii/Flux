@@ -1,7 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 
-namespace Engine::Rendering
+namespace engine::rendering
 {
 struct Vertex
 {
@@ -14,4 +14,4 @@ struct Vertex
     {
     }
 };
-} // namespace Engine::Rendering
+} // namespace engine::rendering
