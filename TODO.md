@@ -20,4 +20,4 @@
 - QoL
   - [ ] write some documentation for the classes and objects
   - [ ] verify the code for each class ( for my future sanity )
-  - [ ] rewrite code with new naming convetions
+  - [ ] rewrite code with new naming conventions

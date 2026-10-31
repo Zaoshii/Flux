@@ -21,7 +21,7 @@ struct Transform
 
     ~Transform() = default;
 
-    glm::mat4 GetModelMatrix() const
+    glm::mat4 getModelMatrix() const
     {
         glm::mat4 transMat = glm::translate(glm::mat4(1.0f), position);
         glm::mat4 rotationMat = glm::mat4_cast(rotation);

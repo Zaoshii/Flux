@@ -16,4 +16,9 @@ enum class ProjectionType
     Perspective,
     Orthographic
 };
+enum class CameraType
+{
+    Unrestricted,
+    FPS
+};
 } // namespace engine::rendering

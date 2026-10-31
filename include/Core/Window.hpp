@@ -4,6 +4,8 @@
 #include <functional>
 #include <glm/glm.hpp>
 #include <stdexcept>
+#include <iostream>
+#include "core/window_user_data.hpp"
 
 namespace engine::core
 {
@@ -15,25 +17,6 @@ public:
      * window
      *
      */
-    Window()
-    {
-        setGLFWContext();
-
-        setGLFWHints();
-
-        glfwWindow_ = glfwCreateWindow(width_, height_, "Engine", nullptr, nullptr);
-
-        if (!glfwWindow_)
-        {
-            glfwTerminate();
-            throw std::runtime_error("Failed to create GLFW window");
-        }
-
-        glfwMakeContextCurrent(glfwWindow_);
-
-        setWindowParameters();
-    }
-
     Window(int width, int height, std::string title)
         : width_(width), height_(height), resolution_(glm::vec2{width_, height_}),
           aspectRatio_(static_cast<float>(width) / static_cast<float>(height))
@@ -43,6 +26,13 @@ public:
         setGLFWHints();
 
         glfwWindow_ = glfwCreateWindow(width_, height_, title.c_str(), nullptr, nullptr);
+
+        std::cout << "Window instance: " << this << '\n';
+        std::cout << "GLFW handle: " << glfwWindow_ << '\n';
+
+        glfwSetWindowUserPointer(glfwWindow_, this);
+
+        std::cout << "Stored user pointer: " << glfwGetWindowUserPointer(glfwWindow_) << '\n';
 
         if (!glfwWindow_)
         {
@@ -80,18 +70,18 @@ public:
 
     float getAspectRatio() const { return aspectRatio_; }
 
+    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
+
 private:
     GLFWwindow *glfwWindow_ = nullptr;
-    int width_ = 800, height_ = 600;
-    glm::vec2 resolution_ = glm::vec2{width_, height_};
-    float aspectRatio_ = (float)width_ / (float)height_;
+    int width_, height_;
+    glm::vec2 resolution_;
+    float aspectRatio_;
 
     void setGLFWContext();
 
     void setGLFWHints();
 
     void setWindowParameters();
-
-    static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 };
 } // namespace engine::core

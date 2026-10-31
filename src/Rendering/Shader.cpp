@@ -1,7 +1,7 @@
 #include "Rendering/Shader.hpp"
 namespace engine::rendering
 {
-Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
+Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath)
 {
     int success;
     char infoLog[512];
@@ -9,8 +9,8 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
-    std::string vertexSource = GetShaderContent(vertexPath);
-    std::string fragmentSource = GetShaderContent(fragmentPath);
+    std::string vertexSource = core::file::readTextFile(vertexPath);
+    std::string fragmentSource = core::file::readTextFile(fragmentPath);
 
     const char *vertexCode = vertexSource.c_str();
     const char *fragmentCode = fragmentSource.c_str();
@@ -37,15 +37,15 @@ Shader::Shader(const std::string &vertexPath, const std::string &fragmentPath)
             std::format("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}", infoLog));
     }
 
-    m_Handle = glCreateProgram();
+    handle_ = glCreateProgram();
 
-    glAttachShader(m_Handle, vertexShader);
-    glAttachShader(m_Handle, fragmentShader);
-    glLinkProgram(m_Handle);
-    glGetProgramiv(m_Handle, GL_LINK_STATUS, &success);
+    glAttachShader(handle_, vertexShader);
+    glAttachShader(handle_, fragmentShader);
+    glLinkProgram(handle_);
+    glGetProgramiv(handle_, GL_LINK_STATUS, &success);
     if (!success)
     {
-        glGetProgramInfoLog(m_Handle, 512, nullptr, infoLog);
+        glGetProgramInfoLog(handle_, 512, nullptr, infoLog);
         throw std::runtime_error(
             std::format("ERROR::SHADER::PROGRAM::LINKING::FAILED\n{}", infoLog));
     }

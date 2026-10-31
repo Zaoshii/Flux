@@ -3,4 +3,4 @@
 namespace engine::rendering
 {
 
-}
+} // namespace engine::rendering

@@ -1,15 +1,18 @@
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/ext.hpp>
 #include <glm/mat4x4.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include "Engine.hpp"
 #include "Rendering/Mesh.hpp"
 #include "Rendering/Shader.hpp"
 #include "Rendering/Cube.hpp"
 #include "Core/input_manager.hpp"
-#include "Rendering/Camera.hpp"
+#include "Rendering/camera.hpp"
 
 #include <numbers>
 #include <mdspan>
@@ -36,8 +39,18 @@ void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
 int main()
 {
 
-    Engine engine(1500, 1000, "quaternion Camera waouh!");
+    Engine engine(1280, 720, "quaternion Camera waouh!");
 
+    std::cout << "OpenGL: " << glGetString(GL_VERSION) << '\n';
+
+    std::cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << '\n';
+
+    std::cout << "Main object: " << engine.window.get()
+              << " | Aspect: " << engine.window->getAspectRatio() << '\n';
+
+    std::cout << "Engine window object: " << engine.window.get() << '\n';
+
+    std::cout << "Engine GLFW handle: " << engine.window->getGlfwWindow() << '\n';
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     glDebugMessageCallback(OpenGLDebugCallback, nullptr);
@@ -65,8 +78,10 @@ int main()
     rendering::CameraSettings settings;
     settings.position = glm::vec3((float)(width) * 4.5f + 5.0f, (float)(height) * 1.5f,
                                   (float)(depth) * 4.5f + 5.0f);
-    settings.projectionType = rendering::ProjectionType::Orthographic;
-    settings.orthographicSize = 50.0f;
+    settings.projectionType = rendering::ProjectionType::Perspective;
+    settings.cameraType = rendering::CameraType::Unrestricted;
+    settings.orthographicSize = 30.0f;
+    settings.farPlane = 1000.0f;
 
     rendering::Camera camera(settings);
 
@@ -76,6 +91,17 @@ int main()
                            (void *)(3 * sizeof(GL_FLOAT)));
     cubeMesh->AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
                            (void *)(5 * sizeof(GL_FLOAT)));
+
+    rendering::Cube cubeSky(cubeMesh);
+    rendering::Shader cubeSkyShader("resources/shaders/cube_sky.vert",
+                                    "resources/shaders/cube_sky.frag");
+    cubeSky.transform.scale = glm::vec3(200.0f, 200.0f, 200.0f);
+
+    rendering::Cube cubeFloor(cubeMesh);
+    rendering::Shader cubeFloorShader("resources/shaders/cube_floor.vert",
+                                      "resources/shaders/cube_floor.frag");
+    cubeFloor.transform.position = glm::vec3(0.0f, -150.0f, 0.0f);
+    cubeFloor.transform.scale = glm::vec3(100.0f, 100.0f, 100.0f);
 
     rendering::Shader cubeShader("resources/shaders/cube.vert", "resources/shaders/cube.frag");
 
@@ -95,43 +121,73 @@ int main()
         }
     }
 
-    core::InputManager inputManager(engine.window);
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    ImGui_ImplGlfw_InitForOpenGL(engine.window->getGlfwWindow(), true);
+    ImGui_ImplOpenGL3_Init("#version 460 core");
 
     while (!glfwWindowShouldClose(engine.window->getGlfwWindow()))
     { // Main loop
+        engine.inputManager->update();
         glfwPollEvents();
         timer.update();
         deltaTime = timer.getDeltaTime();
         if (frameCount % 50 == 0)
         {
             std::cout << std::format("The frame rate is : {}\n", 1.0f / deltaTime);
-            /*std::cout << inputManager.mouseX << "\n"
-                      << inputManager.mouseY << "\n"
-                      << inputManager.deltaMouseX << "\n"
-                      << inputManager.deltaMouseY << "\n";*/
         }
         float angleRotationThisFrame = rotationSpeed * deltaTime;
         glm::quat rotX = glm::angleAxis(angleRotationThisFrame * rotationSpeedX, X);
         glm::quat rotY = glm::angleAxis(angleRotationThisFrame * rotationSpeedY, Y);
         glm::quat rotZ = glm::angleAxis(angleRotationThisFrame * rotationSpeedZ, Z);
         glm::quat rotFinal = rotX * rotY * rotZ;
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+        ImGui::ShowDemoWindow();
         engine.Run();
-        cubeShader.Use();
-        cubeShader.SetMat4("uView", camera.getViewMatrix());
-        cubeShader.SetMat4("uProj", camera.getProjectionMatrix(engine.window->getAspectRatio()));
-        camera.Update(inputManager.getDeltaMouseX(), inputManager.getDeltaMouseY(), deltaTime);
+
+        cubeSkyShader.use();
+        cubeSkyShader.setMat4("uModel", cubeSky.transform.getModelMatrix());
+        cubeSkyShader.setMat4("uView", camera.getViewMatrix());
+        cubeSkyShader.setMat4("uProj", camera.getProjectionMatrix(engine.window->getAspectRatio()));
+        glDisable(GL_CULL_FACE);
+        cubeSky.Draw();
+        glEnable(GL_CULL_FACE);
+
+        cubeShader.use();
+        camera.update(*engine.inputManager, deltaTime);
+        cubeShader.setMat4("uView", camera.getViewMatrix());
+        // std::cout << "Aspect ratio: " << engine.window->getAspectRatio() << '\n';
+        cubeShader.setMat4("uProj", camera.getProjectionMatrix(engine.window->getAspectRatio()));
         for (auto &cube : rawCubes)
         {
             cube.transform.rotation = rotFinal * cube.transform.rotation;
             cube.transform.rotation = glm::normalize(cube.transform.rotation);
-            cubeShader.SetMat4("uModel", cube.transform.GetModelMatrix());
+            cubeShader.setMat4("uModel", cube.transform.getModelMatrix());
             cube.Draw();
         }
+        cubeFloorShader.use();
+        cubeFloorShader.setMat4("uModel", cubeFloor.transform.getModelMatrix());
+        cubeFloorShader.setMat4("uView", camera.getViewMatrix());
+        cubeFloorShader.setMat4("uProj",
+                                camera.getProjectionMatrix(engine.window->getAspectRatio()));
+        cubeFloor.Draw();
 
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         engine.window->swapBuffers();
         frameCount++;
-        inputManager.clearDeltas();
+        engine.inputManager->update();
     }
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
     return 0;
 }

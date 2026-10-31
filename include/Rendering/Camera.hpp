@@ -5,7 +5,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <stdexcept>
+#include <iostream>
 #include "camera_settings.hpp"
+#include "Core/input_manager.hpp"
 
 namespace engine::rendering
 {
@@ -26,21 +28,13 @@ public:
      *
      * @note every property is settable
      *
-     * @param position initial position of the camera in the world
-     * @param orientation initial orientation of the camera in the world
-     * @param projectionType the kind of projection the camera will use (settable)
-     * @param fovy camera fovy and not fov
-     * @param sensitivity sensitivity of the camera
-     * @param orthographicSize defines the orthographic size used to calculate the orthographic box
-     * for orthographic projection
-     * @param nearPlane defines the nearPlane for both orthographic and perspective projection
-     * @param farPlane defines the farPlane for both orthographic and perspective projection
      */
     Camera(const CameraSettings &settings)
         : position_(settings.position), orientation_(settings.orientation),
           projectionType_(settings.projectionType), fovy_(glm::radians(settings.fovy)),
           orthographicSize_(settings.orthographicSize), sensitivity_(settings.sensitivity),
-          nearPlane_(settings.nearPlane), farPlane_(settings.farPlane)
+          speed_(settings.speed), rollSpeed_(settings.rollSpeed), nearPlane_(settings.nearPlane),
+          farPlane_(settings.farPlane), cameraType_(settings.cameraType)
     {
     }
     ~Camera() = default;
@@ -51,8 +45,9 @@ public:
      * @param deltaMouseX
      * @param deltaMouseY
      * @param deltaTime in seconds
+     * @param inputManager for inputs
      */
-    void Update(float deltaMouseX, float deltaMouseY, float deltaTime);
+    void update(const core::InputManager &inputManager, float deltaTime);
 
     glm::mat4 getViewMatrix() const;
 
@@ -97,15 +92,20 @@ public:
     void setFarPlane(float value) { farPlane_ = value; }
 
 private:
-    glm::quat orientation_ = glm::quat{1.0f, 0.00f, 0.0f, 0.0f};
-    glm::vec3 position_ = glm::vec3{0.0f};
-    ProjectionType projectionType_ = ProjectionType::Perspective;
+    glm::vec3 position_;
+    glm::quat orientation_;
+    float yaw_ = 0.0f;
+    float pitch_ = 0.0f;
+    ProjectionType projectionType_;
     /// @brief fovy uses degrees externally but radians internally
-    float fovy_ = glm::radians(45.0f);
+    float fovy_;
     /// @brief oorthographic size is positive
-    float sensitivity_ = 0.25f;
-    float orthographicSize_ = 10.0f;
-    float nearPlane_ = 0.1f;
-    float farPlane_ = 100.0f;
+    float orthographicSize_;
+    float sensitivity_;
+    float speed_;
+    float rollSpeed_;
+    float nearPlane_;
+    float farPlane_;
+    CameraType cameraType_;
 };
 } // namespace engine::rendering

@@ -1,75 +1,63 @@
 #pragma once
 #include <glad/glad.h>
-#include <string>
-#include <fstream>
-#include <sstream>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <format>
+#include "Core/file/file.hpp"
 
 namespace engine::rendering
 {
-inline std::string GetShaderContent(std::string path)
-{
-    std::ifstream input(path, std::ios::in);
-
-    if (!input.is_open() || !input.good())
-        throw std::runtime_error("Could not open the specified path");
-
-    std::stringstream buffer;
-    buffer << input.rdbuf();
-
-    return buffer.str();
-}
 
 class Shader
 {
-private:
-    GLuint m_Handle;
-    mutable std::unordered_map<std::string, GLint> uniformLocationCache;
 
 public:
-    Shader(const std::string &vertexPath, const std::string &fragmentPath);
+    Shader(const std::filesystem::path &vertexPath, const std::filesystem::path &fragmentPath);
 
-    ~Shader() { glDeleteProgram(m_Handle); }
+    ~Shader() { glDeleteProgram(handle_); }
 
-    void Use() { glUseProgram(m_Handle); }
+    void use() { glUseProgram(handle_); }
 
-    GLuint GetID() { return m_Handle; }
+    GLuint getID() { return handle_; }
 
-    GLint GetUniformLocation(const std::string &name) const
+    GLint getUniformLocation(const std::string &name) const
     {
-        if (auto iterator = uniformLocationCache.find(name); iterator != uniformLocationCache.end())
+        if (auto iterator = uniformLocationCache_.find(name);
+            iterator != uniformLocationCache_.end())
         {
             return iterator->second;
         }
-        GLint location = glGetUniformLocation(m_Handle, name.c_str()); // lazy caching
-        uniformLocationCache[name] = location;
+        GLint location = glGetUniformLocation(handle_, name.c_str()); // lazy caching
+        uniformLocationCache_[name] = location;
         return location;
     }
 
-    void SetFloat(const std::string &name, const float data) const
+    void setFloat(const std::string &name, const float &data) const
     {
-        glUniform1f(GetUniformLocation(name), data);
+        glUniform1f(getUniformLocation(name), data);
     }
 
-    void SetVec2(const std::string &name, const glm::vec2 data) const
+    void setVec2(const std::string &name, const glm::vec2 &data) const
     {
-        glUniform2fv(GetUniformLocation(name), 1, glm::value_ptr(data));
+        glUniform2fv(getUniformLocation(name), 1, glm::value_ptr(data));
     }
 
-    void SetVec3(const std::string &name, const glm::vec3 data) const
+    void setVec3(const std::string &name, const glm::vec3 &data) const
     {
-        glUniform3fv(GetUniformLocation(name), 1, glm::value_ptr(data));
+        glUniform3fv(getUniformLocation(name), 1, glm::value_ptr(data));
     }
 
-    void SetVec4(const std::string &name, const glm::vec4 data) const
+    void setVec4(const std::string &name, const glm::vec4 &data) const
     {
-        glUniform4fv(GetUniformLocation(name), 1, glm::value_ptr(data));
+        glUniform4fv(getUniformLocation(name), 1, glm::value_ptr(data));
     }
-    void SetMat4(const std::string &name, const glm::mat4 data) const
+    void setMat4(const std::string &name, const glm::mat4 &data) const
     {
-        glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, glm::value_ptr(data));
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(data));
     }
+
+private:
+    GLuint handle_;
+    mutable std::unordered_map<std::string, GLint> uniformLocationCache_;
 };
 } // namespace engine::rendering

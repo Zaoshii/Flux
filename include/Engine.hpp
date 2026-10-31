@@ -6,18 +6,31 @@
 #include <iostream>
 #include "Core/Timer.hpp"
 #include "Core/Window.hpp"
+#include "Core/window_user_data.hpp"
 #include <memory>
 namespace engine
 {
 struct Engine
 {
-    std::shared_ptr<core::Window> window =
-        nullptr; // optional window hook to allow for custom window management
+    std::unique_ptr<core::InputManager> inputManager;
+    std::shared_ptr<core::Window>
+        window; // optional window hook to allow for custom window management
     std::unique_ptr<core::Timer> timer = nullptr; // optional timer hook
+
+    core::WindowUserData windowUserData;
 
     Engine()
     {
         window = std::make_shared<core::Window>(800, 600, "Engine");
+
+        windowUserData.window = window.get();
+        windowUserData.glfwWindow = window->getGlfwWindow();
+
+        inputManager = std::make_unique<core::InputManager>(windowUserData);
+
+        windowUserData.inputManager = inputManager.get();
+
+        glfwSetWindowUserPointer(window->getGlfwWindow(), &windowUserData);
 
         glfwSetErrorCallback(
             [](int error, const char *description)
@@ -28,7 +41,14 @@ struct Engine
             std::cerr << "Failed to initialize Glad\n";
             glfwDestroyWindow(window->getGlfwWindow());
             glfwTerminate();
+            throw std::runtime_error("Failed to initialize GLAD");
         }
+
+        int width, height;
+
+        glfwGetFramebufferSize(window->getGlfwWindow(), &width, &height);
+
+        glViewport(0, 0, width, height);
 
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_CULL_FACE);
@@ -45,6 +65,15 @@ struct Engine
     {
         window = std::make_shared<core::Window>(width, height, title);
 
+        windowUserData.window = window.get();
+        windowUserData.glfwWindow = window->getGlfwWindow();
+
+        inputManager = std::make_unique<core::InputManager>(windowUserData);
+
+        windowUserData.inputManager = inputManager.get();
+
+        glfwSetWindowUserPointer(window->getGlfwWindow(), &windowUserData);
+
         glfwSetErrorCallback(
             [](int error, const char *description)
             { std::cerr << "GLFW Error " << error << ": " << description << '\n'; });
@@ -54,7 +83,14 @@ struct Engine
             std::cerr << "Failed to initialize Glad\n";
             glfwDestroyWindow(window->getGlfwWindow());
             glfwTerminate();
+            throw std::runtime_error("Failed to initialize GLAD");
         }
+
+        int fwidth, fheight;
+
+        glfwGetFramebufferSize(window->getGlfwWindow(), &fwidth, &fheight);
+
+        glViewport(0, 0, fwidth, fheight);
 
         glEnable(GL_MULTISAMPLE);
         glEnable(GL_CULL_FACE);

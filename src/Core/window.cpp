@@ -1,17 +1,19 @@
 #include "Core/Window.hpp"
+#include <iostream>
 
 namespace engine::core
 {
 
 void Window::framebufferResizeCallback(GLFWwindow *window, int width, int height)
 {
-    Window *myWindow = static_cast<Window *>(glfwGetWindowUserPointer(window));
-    if (myWindow)
+    auto *data = static_cast<WindowUserData *>(glfwGetWindowUserPointer(window));
+    if (data && data->window)
     {
-        myWindow->width_ = width;
-        myWindow->height_ = height;
-        myWindow->resolution_ = glm::vec2{width, height};
-        myWindow->aspectRatio_ = (float)width / (float)height;
+
+        data->window->width_ = width;
+        data->window->height_ = height;
+        data->window->resolution_ = glm::vec2{width, height};
+        data->window->aspectRatio_ = (float)width / (float)height;
 
         glViewport(0, 0, width, height);
     }
@@ -43,10 +45,12 @@ void Window::setGLFWHints()
 
 void Window::setWindowParameters()
 {
-    glfwSetWindowUserPointer(glfwWindow_, this);
     glfwSetFramebufferSizeCallback(glfwWindow_, framebufferResizeCallback);
-
     glfwSwapInterval(1); // TODO: Important to know : VSYNC ON
     glfwSetInputMode(glfwWindow_, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (glfwRawMouseMotionSupported())
+    {
+        glfwSetInputMode(glfwWindow_, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
 }
 } // namespace engine::core

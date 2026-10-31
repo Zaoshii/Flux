@@ -18,9 +18,9 @@ private:
     VertexArray vao;
 
 public:
-    Primitive type;
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
+    Primitive type;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Primitive type)
         : vertices(std::move(vertices)), indices(std::move(indices)), type(std::move(type))
@@ -40,7 +40,7 @@ public:
     void Draw()
     {
         vao.Bind();
-        glDrawElements(Mode(), static_cast<GLsizei>(ebo.GetCount()), GL_UNSIGNED_INT, (void *)0);
+        glDrawElements(Mode(), static_cast<GLsizei>(ebo.getCount()), GL_UNSIGNED_INT, (void *)0);
     }
 
     GLenum Mode()
@@ -69,7 +69,7 @@ public:
     {
         vao.Bind();
         vbo.Bind();
-        ebo.Bind();
+        ebo.bind();
         vao.AddAttribute(index, size, type, normalized, stride, pointer);
     }
 
