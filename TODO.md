@@ -3,14 +3,15 @@
 - Rendering
  
   - [ ] add Instanced GPU draw calls
-  - [ ] add Camera
+  - [x] add Camera
   - [ ] add Instance Vertex Buffer Object
   - [ ] add Uniform Buffer Object
   - [ ] add multiples viewports
   - [ ] add a renderer that takes care of all the rendering stuff
   - [ ] add framebuffer objects
-  - [ ] Find why the camera feels off
-  - [ ] fix the mousedeltas not being initialized at first and causing flickering at the start
+  - [x] Find why the camera feels off
+  - [x] fix the mousedeltas not being initialized at first and causing flickering at the start
+  - [ ] fix the window crashing when minimizing (height = 0 so crashes aspectratio)
 
 - Core
     - [ ] add a logger
@@ -20,4 +21,4 @@
 - QoL
   - [ ] write some documentation for the classes and objects
   - [ ] verify the code for each class ( for my future sanity )
-  - [ ] rewrite code with new naming conventions
+  - [ ] rewrite code with new naming conventions ///25% done

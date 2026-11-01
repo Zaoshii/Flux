@@ -10,3 +10,6 @@ out/
 .vs/
 .vscode/
 .idea/
+
+# My directories
+videos/

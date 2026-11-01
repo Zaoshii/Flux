@@ -32,6 +32,11 @@ public:
         return location;
     }
 
+    void setInt(const std::string &name, const int &data) const
+    {
+        glUniform1i(getUniformLocation(name), data);
+    }
+
     void setFloat(const std::string &name, const float &data) const
     {
         glUniform1f(getUniformLocation(name), data);

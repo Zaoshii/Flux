@@ -107,6 +107,9 @@ int main()
 
     std::vector<rendering::Cube> rawCubes(width * height * depth, rendering::Cube(cubeMesh));
     auto cubeGrid = std::mdspan(rawCubes.data(), width, height, depth);
+    rendering::Cube bigCube(cubeMesh);
+    bigCube.transform.position = glm::vec3(-5.0f, 0.0f, -5.0f);
+    bigCube.transform.scale = glm::vec3(3.0f, 3.0f, 3.0f);
 
     for (size_t x = 0; x < width; x++)
     {
@@ -130,10 +133,73 @@ int main()
     ImGui_ImplGlfw_InitForOpenGL(engine.window->getGlfwWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 460 core");
 
+    // Frame buffer experimentation
+
+    GLuint framebuffer;
+
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    GLuint colorTexture;
+
+    glGenTextures(1, &colorTexture);
+    glBindTexture(GL_TEXTURE_2D, colorTexture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1280, 720, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTexture, 0);
+
+    GLuint depthBuffer;
+
+    glGenRenderbuffers(1, &depthBuffer);
+
+    glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 720);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                              depthBuffer);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "Framebuffer is incomplete!" << std::endl;
+    }
+
+    rendering::Mesh screenQuad(
+        std::vector<rendering::Vertex>{
+            rendering::Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+            rendering::Vertex{{1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+            rendering::Vertex{{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
+            rendering::Vertex{{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}}},
+        std::vector<unsigned int>{0u, 1u, 2u, 1u, 3u, 2u}, rendering::Primitive::Triangles);
+
+    rendering::Shader screenShader("resources/shaders/bayer_dithering.vert",
+                                   "resources/shaders/bayer_dithering.frag");
+
+    screenQuad.AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0);
+    screenQuad.AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
+                            (void *)(3 * sizeof(GL_FLOAT)));
+    screenQuad.AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
+                            (void *)(5 * sizeof(GL_FLOAT)));
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     while (!glfwWindowShouldClose(engine.window->getGlfwWindow()))
     { // Main loop
         engine.inputManager->update();
         glfwPollEvents();
+        if (engine.inputManager->wasKeyPressed(GLFW_KEY_L))
+        {
+            glfwSetInputMode(engine.window->getGlfwWindow(), GLFW_CURSOR, GLFW_CURSOR_CAPTURED);
+        }
+        if (engine.inputManager->wasKeyPressed(GLFW_KEY_K))
+        {
+            glfwSetInputMode(engine.window->getGlfwWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        }
         timer.update();
         deltaTime = timer.getDeltaTime();
         if (frameCount % 50 == 0)
@@ -145,12 +211,16 @@ int main()
         glm::quat rotY = glm::angleAxis(angleRotationThisFrame * rotationSpeedY, Y);
         glm::quat rotZ = glm::angleAxis(angleRotationThisFrame * rotationSpeedZ, Z);
         glm::quat rotFinal = rotX * rotY * rotZ;
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, 1280, 720);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         ImGui::ShowDemoWindow();
-        engine.Run();
 
         cubeSkyShader.use();
         cubeSkyShader.setMat4("uModel", cubeSky.transform.getModelMatrix());
@@ -172,6 +242,9 @@ int main()
             cubeShader.setMat4("uModel", cube.transform.getModelMatrix());
             cube.Draw();
         }
+        cubeShader.setMat4("uModel", bigCube.getModelMatrix());
+        bigCube.Draw();
+
         cubeFloorShader.use();
         cubeFloorShader.setMat4("uModel", cubeFloor.transform.getModelMatrix());
         cubeFloorShader.setMat4("uView", camera.getViewMatrix());
@@ -181,9 +254,19 @@ int main()
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_DEPTH_TEST);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, colorTexture);
+        screenShader.use();
+        screenShader.setInt("screenTexture", 0);
+        screenQuad.Draw();
+
         engine.window->swapBuffers();
         frameCount++;
-        engine.inputManager->update();
+        glEnable(GL_DEPTH_TEST);
     }
 
     ImGui_ImplOpenGL3_Shutdown();

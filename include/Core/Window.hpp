@@ -30,8 +30,6 @@ public:
         std::cout << "Window instance: " << this << '\n';
         std::cout << "GLFW handle: " << glfwWindow_ << '\n';
 
-        glfwSetWindowUserPointer(glfwWindow_, this);
-
         std::cout << "Stored user pointer: " << glfwGetWindowUserPointer(glfwWindow_) << '\n';
 
         if (!glfwWindow_)

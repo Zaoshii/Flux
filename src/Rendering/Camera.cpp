@@ -9,21 +9,17 @@ void Camera::update(const core::InputManager &inputManager, float deltaTime)
     case CameraType::FPS:
     {
 
-        // 1. On accumule les modifications directement en DEGRÉS
         float xOffset = inputManager.getDeltaMouseX() * sensitivity_;
         float yOffset = inputManager.getDeltaMouseY() * sensitivity_;
 
         yaw_ -= xOffset;
         pitch_ += yOffset;
 
-        // 2. Le clamp est beaucoup plus simple et rapide à lire en degrés
         pitch_ = glm::clamp(pitch_, -89.0f, 89.0f);
 
-        // 3. On convertit en radians UNIQUEMENT à la création des axes de rotation
         glm::quat yawRotation = glm::angleAxis(glm::radians(yaw_), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::quat pitchRotation = glm::angleAxis(glm::radians(pitch_), glm::vec3(1.0f, 0.0f, 0.0f));
 
-        // 4. L'ordre de multiplication est parfait pour une caméra FPS
         orientation_ = glm::normalize(yawRotation * pitchRotation);
 
         glm::vec3 cameraRight = glm::normalize(orientation_ * glm::vec3(1.0f, 0.0f, 0.0f));
@@ -105,7 +101,7 @@ void Camera::update(const core::InputManager &inputManager, float deltaTime)
         // Always normalize quaternions to prevent floating-point drift
         orientation_ = glm::normalize(orientation_);
 
-        // 4. Movement Translation (Using updated local vectors)
+        // Movement Translation
         if (inputManager.isKeyPressed(GLFW_KEY_W))
         {
             position_ += deltaTime * speed_ * localForward;
