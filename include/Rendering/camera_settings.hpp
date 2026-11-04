@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include "RendererTypes.hpp"
+#include "renderer_types.hpp"
 
 namespace engine::rendering
 {

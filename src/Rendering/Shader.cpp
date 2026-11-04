@@ -22,6 +22,7 @@ Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::p
     if (!success)
     {
         glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
+        glDeleteShader(vertexShader);
         throw std::runtime_error(
             std::format("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n{}", infoLog));
     }
@@ -33,6 +34,8 @@ Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::p
     if (!success)
     {
         glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
         throw std::runtime_error(
             std::format("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n{}", infoLog));
     }
@@ -46,6 +49,9 @@ Shader::Shader(const std::filesystem::path &vertexPath, const std::filesystem::p
     if (!success)
     {
         glGetProgramInfoLog(handle_, 512, nullptr, infoLog);
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+        glDeleteProgram(handle_);
         throw std::runtime_error(
             std::format("ERROR::SHADER::PROGRAM::LINKING::FAILED\n{}", infoLog));
     }

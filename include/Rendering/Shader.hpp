@@ -32,6 +32,25 @@ public:
         return location;
     }
 
+    Shader(const Shader &) = delete;
+    Shader &operator=(const Shader &) = delete;
+
+    Shader(Shader &&other) noexcept
+    {
+        handle_ = other.handle_;
+        other.handle_ = 0;
+    }
+    Shader &operator=(Shader &&other) noexcept
+    {
+        if (this != &other)
+        {
+            glDeleteProgram(this->handle_);
+            this->handle_ = other.handle_;
+            other.handle_ = 0;
+        }
+        return *this;
+    }
+
     void setInt(const std::string &name, const int &data) const
     {
         glUniform1i(getUniformLocation(name), data);

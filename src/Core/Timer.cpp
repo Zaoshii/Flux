@@ -1,4 +1,4 @@
-#include "Core/Timer.hpp"
+#include "Core/timer.hpp"
 
 namespace engine::core
 {

@@ -14,33 +14,34 @@ find_package(imgui CONFIG REQUIRED)
 
 add_executable(Engine
     src/main.cpp
-    include/Engine.hpp
-    include/Rendering/VertexArray.hpp
-    include/Rendering/IndexBuffer.hpp
-    include/Rendering/VertexBuffer.hpp
-    include/Rendering/Shader.hpp
-    include/Core/Timer.hpp
-    include/Rendering/Mesh.hpp
-    include/Rendering/RendererTypes.hpp
-    src/Engine.cpp
-    src/Core/Timer.cpp
-    include/Rendering/camera.hpp
-    src/Rendering/camera.cpp
-    src/Rendering/Shader.cpp
-    include/Rendering/Vertex.hpp
-    include/Rendering/Cube.hpp
-    src/Rendering/Cube.cpp
-    include/Rendering/Transform.hpp
-    src/Rendering/Mesh.cpp
-    include/Core/Log.hpp
-    include/Core/Window.hpp
-    include/Core/input_manager.hpp
-    src/Core/input_manager.cpp
-    src/Core/window.cpp
-    include/Rendering/camera_settings.hpp
-    include/Core/file/file.hpp
-    src/Core/file/file.cpp
-    include/Core/window_user_data.hpp
+    include/engine.hpp
+    include/rendering/vertex_array.hpp
+    include/rendering/index_buffer.hpp
+    include/rendering/vertex_buffer.hpp
+    include/rendering/Shader.hpp
+    include/core/timer.hpp
+    include/rendering/mesh.hpp
+    include/rendering/renderer_types.hpp
+    src/engine.cpp
+    src/core/timer.cpp
+    include/rendering/camera.hpp
+    src/rendering/camera.cpp
+    src/rendering/shader.cpp
+    include/rendering/vertex.hpp
+    include/rendering/cube.hpp
+    src/rendering/cube.cpp
+    include/rendering/transform.hpp
+    src/rendering/mesh.cpp
+    include/core/log.hpp
+    include/core/window.hpp
+    include/core/input_manager.hpp
+    src/core/input_manager.cpp
+    src/core/window.cpp
+    include/rendering/camera_settings.hpp
+    include/core/file/file.hpp
+    src/core/file/file.cpp
+    include/core/window_user_data.hpp
+    include/rendering/renderer.hpp
 )
 
 target_include_directories(Engine PRIVATE include)
@@ -71,6 +72,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wextra
         -Wpedantic
         -Wshadow
+        -Wuninitialized
+        -Wmaybe-uninitialized
+        -Wnon-virtual-dtor
+        -Wnull-dereference
+        -Wconversion
+        -Wsign-conversion
     )
 
 endif()

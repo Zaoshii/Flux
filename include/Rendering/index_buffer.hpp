@@ -28,14 +28,11 @@ public:
     {
         if (this != &other)
         {
-            if (this->handle_ != 0)
-            {
-                glDeleteBuffers(1, &this->handle_);
-                this->handle_ = other.handle_;
-                this->count_ = other.count_;
-                other.handle_ = 0;
-                other.count_ = 0;
-            }
+            glDeleteBuffers(1, &this->handle_);
+            this->handle_ = other.handle_;
+            this->count_ = other.count_;
+            other.handle_ = 0;
+            other.count_ = 0;
         }
         return *this;
     }
@@ -46,7 +43,7 @@ public:
 
     unsigned int getCount() const { return count_; }
 
-    void Initialize(const unsigned int *data, unsigned int count)
+    void initialize(const unsigned int *data, unsigned int count)
     {
         count_ = count;
         bind();

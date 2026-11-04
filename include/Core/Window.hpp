@@ -70,6 +70,9 @@ public:
 
     static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 
+    Window(const Window &) = delete;
+    Window &operator=(const Window &) = delete;
+
 private:
     GLFWwindow *glfwWindow_ = nullptr;
     int width_, height_;

@@ -11,7 +11,7 @@
   - [ ] add framebuffer objects
   - [x] Find why the camera feels off
   - [x] fix the mousedeltas not being initialized at first and causing flickering at the start
-  - [ ] fix the window crashing when minimizing (height = 0 so crashes aspectratio)
+  - [x] fix the window crashing when minimizing (height = 0 so crashes aspectratio)
 
 - Core
     - [ ] add a logger
@@ -21,4 +21,4 @@
 - QoL
   - [ ] write some documentation for the classes and objects
   - [ ] verify the code for each class ( for my future sanity )
-  - [ ] rewrite code with new naming conventions ///25% done
+  - [x] rewrite code with new naming conventions ///25% done

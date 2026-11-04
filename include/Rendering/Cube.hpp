@@ -15,7 +15,7 @@ public:
     Cube(std::shared_ptr<Mesh> mesh) : mesh_(mesh) {}
     ~Cube() = default;
     Transform transform;
-    void Draw() const { mesh_->Draw(); }
+    void Draw() const { mesh_->draw(); }
     glm::mat4 getModelMatrix() const { return transform.getModelMatrix(); }
 
 private:

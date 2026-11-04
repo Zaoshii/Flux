@@ -5,7 +5,7 @@ These conventions keep the engine consistent, readable, and easy to maintain. Ap
 ## 1. Naming Rules
 
 | Element | Convention | Example |
-|---|---|---|
+| ------- | ---------- | ------- |
 | Classes | PascalCase | `Camera`, `InputManager` |
 | Structs | PascalCase | `Vertex`, `RenderSettings` |
 | Functions and methods | camelCase | `updateCamera()`, `loadTexture()` |
@@ -55,6 +55,7 @@ Apply this brace style consistently to classes, functions, namespaces, control-f
 - Prefix boolean names with meaningful terms such as `is`, `has`, or `should` where appropriate: `isVisible_`, `hasTexture_`, `shouldClose_`.
 - Use `const` for values that should not change.
 - Pass larger objects by `const` reference when appropriate to avoid unnecessary copies.
+- Public members should simply be written in camelCase, and constructor parameters will use _ in order to avoid shadowing
 
 ## 5. Constants and Enums
 
@@ -112,6 +113,7 @@ MyEngine/
 Keep each `.cpp` file associated with its corresponding `.hpp` file by name.
 
 For example:
+
 - `include/engine/camera.hpp`
 - `src/camera.cpp`
 
@@ -128,8 +130,6 @@ Use include paths that reflect the public header structure:
 - Private implementation headers can live in `src/` when they should not be part of the public interface.
 - Build configuration files, such as `CMakeLists.txt`, retain their required filenames.
 - Third-party files retain their original naming conventions.
-
-
 
 ## 8. Core Principle
 

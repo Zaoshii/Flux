@@ -13,7 +13,11 @@ void Window::framebufferResizeCallback(GLFWwindow *window, int width, int height
         data->window->width_ = width;
         data->window->height_ = height;
         data->window->resolution_ = glm::vec2{width, height};
-        data->window->aspectRatio_ = (float)width / (float)height;
+        if (height != 0)
+        {
+
+            data->window->aspectRatio_ = (float)width / (float)height;
+        }
 
         glViewport(0, 0, width, height);
     }

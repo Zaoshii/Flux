@@ -10,8 +10,9 @@
 #include <memory>
 namespace engine
 {
-struct Engine
+class Engine
 {
+public:
     std::unique_ptr<core::InputManager> inputManager;
     std::shared_ptr<core::Window>
         window; // optional window hook to allow for custom window management
@@ -107,7 +108,7 @@ struct Engine
 
     void Run()
     {
-        glClearColor(53.0 / 255.0, 19.0 / 255.0, 79.0 / 255.0, 1.0f);
+        glClearColor(53.0f / 255.0f, 19.0f / 255.0f, 79.0f / 255.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 };

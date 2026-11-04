@@ -8,16 +8,16 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "Engine.hpp"
-#include "Rendering/Mesh.hpp"
+#include "Rendering/mesh.hpp"
 #include "Rendering/Shader.hpp"
-#include "Rendering/Cube.hpp"
+#include "Rendering/cube.hpp"
 #include "Core/input_manager.hpp"
 #include "Rendering/camera.hpp"
 
 #include <numbers>
 #include <mdspan>
 
-constexpr float PI = std::numbers::pi;
+constexpr float PI = static_cast<float>(std::numbers::pi);
 
 // force buil
 
@@ -71,9 +71,9 @@ int main()
     glm::vec3 Y(0.0f, 1.0f, 0.0f);
     glm::vec3 Z(0.0f, 0.0f, 1.0f);
 
-    constexpr size_t width = 8;
-    constexpr size_t height = 8;
-    constexpr size_t depth = 8;
+    constexpr float width = 8.0f;
+    constexpr float height = 8.0f;
+    constexpr float depth = 8.0f;
 
     rendering::CameraSettings settings;
     settings.position = glm::vec3((float)(width) * 4.5f + 5.0f, (float)(height) * 1.5f,
@@ -85,12 +85,12 @@ int main()
 
     rendering::Camera camera(settings);
 
-    std::shared_ptr<rendering::Mesh> cubeMesh = rendering::Mesh::CreateCube();
-    cubeMesh->AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0);
-    cubeMesh->AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
+    std::shared_ptr<rendering::Mesh> cubeMesh = rendering::Mesh::createCube();
+    cubeMesh->addAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0);
+    cubeMesh->addAttribute(1, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
                            (void *)(3 * sizeof(GL_FLOAT)));
-    cubeMesh->AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
-                           (void *)(5 * sizeof(GL_FLOAT)));
+    cubeMesh->addAttribute(2, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
+                           (void *)(6 * sizeof(GL_FLOAT)));
 
     rendering::Cube cubeSky(cubeMesh);
     rendering::Shader cubeSkyShader("resources/shaders/cube_sky.vert",
@@ -111,11 +111,11 @@ int main()
     bigCube.transform.position = glm::vec3(-5.0f, 0.0f, -5.0f);
     bigCube.transform.scale = glm::vec3(3.0f, 3.0f, 3.0f);
 
-    for (size_t x = 0; x < width; x++)
+    for (float x = 0; x < width; x++)
     {
-        for (size_t y = 0; y < height; y++)
+        for (float y = 0; y < height; y++)
         {
-            for (size_t z = 0; z < depth; z++)
+            for (float z = 0; z < depth; z++)
             {
                 cubeGrid[x, y, z].transform.position.x = 2 * x;
                 cubeGrid[x, y, z].transform.position.y = 2 * y;
@@ -172,20 +172,20 @@ int main()
 
     rendering::Mesh screenQuad(
         std::vector<rendering::Vertex>{
-            rendering::Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-            rendering::Vertex{{1.0f, -1.0f, 0.0f}, {1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-            rendering::Vertex{{-1.0f, 1.0f, 0.0f}, {0.0f, 1.0f}, {0.0f, 0.0f, 0.0f}},
-            rendering::Vertex{{1.0f, 1.0f, 0.0f}, {1.0f, 1.0f}, {0.0f, 0.0f, 0.0f}}},
+            rendering::Vertex{{-1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
+            rendering::Vertex{{1.0f, -1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 0.0f}},
+            rendering::Vertex{{-1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {0.0f, 1.0f}},
+            rendering::Vertex{{1.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}, {1.0f, 1.0f}}},
         std::vector<unsigned int>{0u, 1u, 2u, 1u, 3u, 2u}, rendering::Primitive::Triangles);
 
     rendering::Shader screenShader("resources/shaders/bayer_dithering.vert",
                                    "resources/shaders/bayer_dithering.frag");
 
-    screenQuad.AddAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0);
-    screenQuad.AddAttribute(1, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
+    screenQuad.addAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), (void *)0); // pos
+    screenQuad.addAttribute(1, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), // normals
                             (void *)(3 * sizeof(GL_FLOAT)));
-    screenQuad.AddAttribute(2, 3, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex),
-                            (void *)(5 * sizeof(GL_FLOAT)));
+    screenQuad.addAttribute(2, 2, GL_FLOAT, GL_FALSE, sizeof(rendering::Vertex), // uvs
+                            (void *)(6 * sizeof(GL_FLOAT)));
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     while (!glfwWindowShouldClose(engine.window->getGlfwWindow()))
@@ -262,7 +262,7 @@ int main()
         glBindTexture(GL_TEXTURE_2D, colorTexture);
         screenShader.use();
         screenShader.setInt("screenTexture", 0);
-        screenQuad.Draw();
+        screenQuad.draw();
 
         engine.window->swapBuffers();
         frameCount++;

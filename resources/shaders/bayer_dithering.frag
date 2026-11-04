@@ -30,7 +30,7 @@ void main()
     float threshold = getBayerValue(ivec2(gl_FragCoord.xy));
 
     // levels per color channel
-    float levels = 2.0;
+    float levels = 1.75;
 
     // dithering
     vec3 dithered = floor(color.rgb * levels + threshold) / levels;

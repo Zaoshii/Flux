@@ -1,10 +1,10 @@
 #pragma once
 #include <glad/glad.h>
 #include <vector>
-#include "Rendering/IndexBuffer.hpp"
-#include "Rendering/VertexBuffer.hpp"
-#include "Rendering/VertexArray.hpp"
-#include "Rendering/RendererTypes.hpp"
+#include "Rendering/index_buffer.hpp"
+#include "Rendering/vertex_buffer.hpp"
+#include "Rendering/vertex_array.hpp"
+#include "Rendering/renderer_types.hpp"
 #include "Rendering/Vertex.hpp"
 #include <memory>
 
@@ -12,40 +12,33 @@ namespace engine::rendering
 {
 class Mesh
 {
-private:
-    VertexBuffer vbo;
-    IndexBuffer ebo;
-    VertexArray vao;
 
 public:
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    Primitive type;
-
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Primitive type)
-        : vertices(std::move(vertices)), indices(std::move(indices)), type(std::move(type))
+        : vertices_(std::move(vertices)), indices_(std::move(indices)),
+          primitiveType_(std::move(type))
     {
 
-        vao.Bind();
+        vao_.bind();
 
-        vbo.Initialize(this->vertices.data(),
-                       static_cast<unsigned int>(this->vertices.size() * sizeof(Vertex)));
+        vbo_.initialize(this->vertices_.data(),
+                        static_cast<unsigned int>(this->vertices_.size() * sizeof(Vertex)));
 
-        ebo.Initialize(this->indices.data(), static_cast<unsigned int>(this->indices.size()));
-        vao.Unbind();
+        ebo_.initialize(this->indices_.data(), static_cast<unsigned int>(this->indices_.size()));
+        vao_.unbind();
     }
 
     ~Mesh() = default;
 
-    void Draw()
+    void draw()
     {
-        vao.Bind();
-        glDrawElements(Mode(), static_cast<GLsizei>(ebo.getCount()), GL_UNSIGNED_INT, (void *)0);
+        vao_.bind();
+        glDrawElements(mode(), static_cast<GLsizei>(ebo_.getCount()), GL_UNSIGNED_INT, (void *)0);
     }
 
-    GLenum Mode()
+    GLenum mode()
     {
-        switch (type)
+        switch (primitiveType_)
         {
         case Primitive::Points:
             return GL_POINTS;
@@ -64,16 +57,25 @@ public:
         }
     }
 
-    void AddAttribute(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
-                      const void *pointer)
+    void addAttribute(GLuint index, GLint size, GLenum primitiveType, GLboolean normalized,
+                      GLsizei stride, const void *pointer)
     {
-        vao.Bind();
-        vbo.Bind();
-        ebo.bind();
-        vao.AddAttribute(index, size, type, normalized, stride, pointer);
+        vao_.bind();
+        vbo_.bind();
+        ebo_.bind();
+        vao_.addAttribute(index, size, primitiveType, normalized, stride, pointer);
     }
 
-    static std::shared_ptr<Mesh> CreateCube();
+    static std::shared_ptr<Mesh> createCube();
+
+private:
+    VertexBuffer vbo_;
+    IndexBuffer ebo_;
+    VertexArray vao_;
+
+    std::vector<Vertex> vertices_;
+    std::vector<unsigned int> indices_;
+    Primitive primitiveType_;
 };
 
 } // namespace engine::rendering

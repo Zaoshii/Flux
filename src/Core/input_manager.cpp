@@ -22,7 +22,7 @@ void InputManager::glfwMouseCallback(GLFWwindow *window, double xpos, double ypo
 
     if (data && data->inputManager)
     {
-        data->inputManager->handleMouseMovement(xpos, ypos);
+        data->inputManager->handleMouseMovement(static_cast<float>(xpos), static_cast<float>(ypos));
     }
 }
 
